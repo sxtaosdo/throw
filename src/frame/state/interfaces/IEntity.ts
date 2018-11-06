@@ -1,0 +1,4 @@
+
+interface IEntity {
+    staticMachine: IStateMachine;
+}

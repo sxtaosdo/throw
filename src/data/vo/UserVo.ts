@@ -1,0 +1,4 @@
+class UserVo {
+	public constructor() {
+	}
+}
