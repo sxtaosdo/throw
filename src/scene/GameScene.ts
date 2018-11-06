@@ -51,17 +51,54 @@ class GameStateReady implements IState {
 		let throwAngle: number = Math.atan2(this.beginY - evt.localY, this.beginX - evt.localX);
 
 		let p0: egret.Point = new egret.Point(bx, by);
-		let p1: egret.Point = new egret.Point(by - 750 / Math.tan(throwAngle), by - 750);
-		let p2: egret.Point = new egret.Point(by - 900 / Math.tan(throwAngle), by - 750 - (900 - 750));
+		let p1: egret.Point = new egret.Point(by - 600 / Math.tan(throwAngle), by - 600);
+		let p2: egret.Point = new egret.Point(by - 750 / Math.tan(throwAngle), by - 600 - (750 - 600));
 		this.owner.lineList = [p0, p1, p2];
 
+		let color: Array<number> = [0xff0000, 0x00ff00, 0x0000ff];
+
 		this.owner.sp.graphics.clear();
-		this.owner.lineList.forEach(element => {
-			this.owner.sp.graphics.beginFill(0xffffff);
+		this.owner.lineList.forEach((element, index) => {
+			this.owner.sp.graphics.beginFill(color[index]);
 			this.owner.sp.graphics.drawCircle(element.x, element.y, 9);
 			this.owner.sp.graphics.endFill();
 			console.log(element.x, element.y, throwAngle);
 		})
+		this.owner.staticMachine.changeState(GameStateRun);
+	}
+}
 
+class GameStateRun implements IState {
+	owner: GameScene;
+
+	public onEnter(data: any): void {
+		this.owner = data;
+		this.owner.addEventListener(egret.Event.ENTER_FRAME, this.onUpdate, this);
+		egret.Tween.get(this).to({ factor: 1 }, 2000).call(this.moveOver, this);
+	}
+
+	public onExit(data?: any): void {
+		this.owner.removeEventListener(egret.Event.ENTER_FRAME, this.onUpdate, this);
+	}
+
+	private onUpdate(evt: egret.Event): void {
+		this.owner.sp.graphics.beginFill(0xffffff);
+		this.owner.sp.graphics.drawCircle(this.owner.basketball.x, this.owner.basketball.y, 5);
+		this.owner.sp.graphics.endFill();
+	}
+
+	public get factor(): number {
+		return 0;
+	}
+
+	public set factor(value: number) {
+		this.owner.basketball.x = (1 - value) * (1 - value) * this.owner.lineList[0].y + 2 * value * (1 - value) * this.owner.lineList[1].x + value * value * this.owner.lineList[2].x;
+		this.owner.basketball.y = (1 - value) * (1 - value) * this.owner.lineList[1].y + 2 * value * (1 - value) * this.owner.lineList[1].y + value * value * this.owner.lineList[2].y;
+	}
+
+	private moveOver(): void {
+		this.owner.basketball.x = 375;
+		this.owner.basketball.y = 937;
+		this.owner.staticMachine.changeState(GameStateReady);
 	}
 }
