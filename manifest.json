@@ -51,6 +51,7 @@
 		"bin-debug/scene/GameScene.js",
 		"bin-debug/scene/LoadingScene.js",
 		"bin-debug/scene/LoginScene.js",
-		"bin-debug/util/p2DebugDraw.js"
+		"bin-debug/util/p2DebugDraw.js",
+		"bin-debug/util/P2Util.js"
 	]
 }

@@ -22,7 +22,7 @@ class GameScene extends BaseScene implements IEntity {
 
 	}
 	protected onComplete(): void {
-		this.staticMachine.changeState(GameStateReady);
+		this.staticMachine.changeState(GameStateInit);
 
 		this.sp = new egret.Sprite();
 		this.addChild(this.sp);
@@ -31,18 +31,66 @@ class GameScene extends BaseScene implements IEntity {
 
 class GameStateInit implements IState {
 	owner: GameScene;
+	world: p2.World;
 
 	public onEnter(data: any): void {
 		this.owner = data;
+		this.world = PhysicsManager.instance.world;
+		this.createPhysicsWorld();
+		this.owner.staticMachine.changeState(GameStateReady);
 	}
 	public onExit(data?: any): void {
 
 	}
 
 	private createPhysicsWorld(): void {
-
+		this.createPlane();
+		this.createBasketball();
+		this.createBasket();
 	}
 
+	private createPlane() {
+		//创建一个shape形状
+		let planeShape: p2.Plane = new p2.Plane();
+		//创建body刚体
+		let planeBody: p2.Body = new p2.Body({
+			//刚体类型
+			type: p2.Body.STATIC,
+			//刚体的位置
+			position: [0, this.owner.stage.stageHeight / PhysicsManager.FACTOR]
+		});
+		planeBody.angle = Math.PI;
+		planeBody.displays = [];
+		planeBody.addShape(planeShape);
+		this.world.addBody(planeBody);
+	}
+
+	private createBasketball(): void {
+		let shape: p2.Circle = new p2.Circle({ radius: this.owner.basketball.width / 100 });
+		let body: p2.Body = new p2.Body();
+		// body.type = p2.Body.STATIC;
+		body.position[0] = this.owner.basketball.x / PhysicsManager.FACTOR;
+		body.position[1] = (this.owner.stage.stageHeight - this.owner.basketball.y) / PhysicsManager.FACTOR;
+		body.displays = [this.owner.basketball];
+		body.addShape(shape);
+		this.world.addBody(body);
+	}
+
+	private createBasket(): void {
+		let ps1: egret.Shape = new egret.Shape();
+		ps1.graphics.beginFill(0x000000);
+		ps1.graphics.drawCircle(0, 0, 20);
+		ps1.graphics.endFill();
+		this.owner.stage.addChild(ps1);
+
+		let shape: p2.Shape = new p2.Circle({ radius: ps1.width / 100 });
+		let body: p2.Body = new p2.Body();
+		body.addShape(shape);
+		body.position[0] = 100 / PhysicsManager.FACTOR;
+		body.position[1] = (this.owner.stage.stageHeight - 100) / PhysicsManager.FACTOR;
+		body.displays = [ps1];
+		this.world.addBody(body);
+	}
 }
 
 class GameStateReady implements IState {
