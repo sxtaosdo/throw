@@ -14,22 +14,34 @@ class BaseStateMachine implements IStateMachine {
     addGlobalState(clazz: any): void {
     }
 
-    changeState(clazz: any): void {
-        if (this.currentClazz == clazz) {
+    changeState(newClazz: any): void {
+        if (this.currentClazz == newClazz) {
             return;
+        } else {
+            this.currentClazz = newClazz;
         }
-        this.currentClazz = clazz;
 
+        this.preState = this.cutState;
         if (this.preState) {
             this.preState.onExit(this.owner);
         }
-        this.preState = this.cutState;
 
-        if (!this.instanceMap[clazz]) {
-            this.instanceMap[clazz] = new clazz();
+        if (!this.instanceMap[newClazz]) {
+            this.instanceMap[newClazz] = new newClazz();
         }
-        this.cutState = this.instanceMap[clazz];
+        this.cutState = this.instanceMap[newClazz];
         this.cutState.onEnter(this.owner);
+
+        //================================================
+        // if (this.cutState == null) {
+        //     this.currentClazz = newClazz;
+        //     this.cutState.onEnter(this.owner);
+        // } else {
+        //     this.preState = this.cutState;
+        //     this.preState.onExit(this.owner);
+        //     this.cutState = newClazz;
+        //     this.cutState.onEnter(this.owner);
+        // }
     }
 
     isInState(state: any): boolean {

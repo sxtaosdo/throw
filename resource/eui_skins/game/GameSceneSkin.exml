@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e:Skin class="GameSceneSkin" width="750" height="1134" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
 	<e:Image source="ground_png" x="-61.5" y="930"/>
-	<e:Image source="ballBottom_png" x="327" y="1024.12"/>
-	<e:Image id="basketball" source="ball_png" x="375" y="937" anchorOffsetX="91" anchorOffsetY="91"/>
+	<e:Image id="shadow" source="ballBottom_png" x="375" y="1030" anchorOffsetX="48" anchorOffsetY="8.5"/>
 	<e:Group id="backboard" x="128.5" y="174">
 		<e:Image source="bg_png" x="0" y="0" scaleX="1" scaleY="1"/>
 		<e:Image source="lan_png" x="188.5" y="256.07" scaleX="1" scaleY="1"/>
 	</e:Group>
+	<e:Image id="basketball" source="ball_png" x="375" y="937" anchorOffsetX="91" anchorOffsetY="91"/>
+	<e:Group id="physicsLayout" left="0" top="0" bottom="0" right="0"/>
 </e:Skin>

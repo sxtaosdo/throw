@@ -1,9 +1,16 @@
 class GameScene extends BaseScene implements IEntity {
 
-	public basketball: eui.Image;
+	public static readonly RS: number = 20;
+
+	public shadow: eui.Image;
 	public backboard: eui.Group;
+	public basketball: eui.Image;
+	public physicsLayout: eui.Group;
+
 	public lineList: Array<egret.Point>;
 	public sp: egret.Sprite;
+	public lastY: number;
+	public rotations: number = GameScene.RS;
 
 	public staticMachine: IStateMachine;
 
@@ -20,6 +27,22 @@ class GameScene extends BaseScene implements IEntity {
 		this.sp = new egret.Sprite();
 		this.addChild(this.sp);
 	}
+}
+
+class GameStateInit implements IState {
+	owner: GameScene;
+
+	public onEnter(data: any): void {
+		this.owner = data;
+	}
+	public onExit(data?: any): void {
+
+	}
+
+	private createPhysicsWorld(): void {
+
+	}
+
 }
 
 class GameStateReady implements IState {
@@ -41,19 +64,26 @@ class GameStateReady implements IState {
 	private onTouchBegin(evt: egret.TouchEvent): void {
 		this.beginX = evt.localX;
 		this.beginY = evt.localY;
+		console.log("onTouchBegin", this.beginX, this.beginY);
 	}
 
 	private onTouchEnd(evt: egret.TouchEvent): void {
+		console.log("onTouchBegin", evt.localX, evt.localY);
+		this.owner.lastY = this.owner.backboard.y;
+		this.owner.basketball.scaleX = this.owner.basketball.scaleY = 1;
+		this.owner.shadow.x = this.owner.basketball.x;
+		this.owner.shadow.alpha = 1;
 		//篮球坐标
 		let bx: number = this.owner.basketball.x;
 		let by: number = this.owner.basketball.y;
 		//抛掷角度
-		let throwAngle: number = Math.atan2(this.beginY - evt.localY, this.beginX - evt.localX);
-
+		let throwAngle: number = Math.atan2(evt.localY - this.beginY, evt.localX - this.beginX);
 		let p0: egret.Point = new egret.Point(bx, by);
-		let p1: egret.Point = new egret.Point(by - 600 / Math.tan(throwAngle), by - 600);
-		let p2: egret.Point = new egret.Point(by - 750 / Math.tan(throwAngle), by - 600 - (750 - 600));
+		let p1: egret.Point = new egret.Point(bx + 800 * Math.cos(throwAngle), by - 800);
+		let p2: egret.Point = new egret.Point(bx + 1000 * Math.cos(throwAngle), by - 650);
 		this.owner.lineList = [p0, p1, p2];
+
+		// this.owner.lineList = [new egret.Point(bx, by), new egret.Point(bx + 79, by - 900), new egret.Point(bx + 140, by - 600)];
 
 		let color: Array<number> = [0xff0000, 0x00ff00, 0x0000ff];
 
@@ -62,7 +92,6 @@ class GameStateReady implements IState {
 			this.owner.sp.graphics.beginFill(color[index]);
 			this.owner.sp.graphics.drawCircle(element.x, element.y, 9);
 			this.owner.sp.graphics.endFill();
-			console.log(element.x, element.y, throwAngle);
 		})
 		this.owner.staticMachine.changeState(GameStateRun);
 	}
@@ -79,12 +108,24 @@ class GameStateRun implements IState {
 
 	public onExit(data?: any): void {
 		this.owner.removeEventListener(egret.Event.ENTER_FRAME, this.onUpdate, this);
+		this.owner.basketball.scaleX = this.owner.basketball.scaleY = 1;
 	}
 
 	private onUpdate(evt: egret.Event): void {
 		this.owner.sp.graphics.beginFill(0xffffff);
 		this.owner.sp.graphics.drawCircle(this.owner.basketball.x, this.owner.basketball.y, 5);
 		this.owner.sp.graphics.endFill();
+		if (this.owner.basketball.y < this.owner.lastY) {
+			this.owner.basketball.scaleX = this.owner.basketball.scaleY -= 0.005;
+		}
+		this.owner.lastY = this.owner.basketball.y;
+		this.owner.shadow.x = this.owner.basketball.x;
+		this.owner.shadow.alpha -= 0.02;
+		this.owner.shadow.scaleX = this.owner.shadow.scaleY -= 0.01;
+		this.owner.shadow.y -= 1;
+		this.owner.basketball.rotation += this.owner.rotations;
+		this.owner.rotations -= 0.15;
+		// console.log(this.owner.basketball.scaleX);
 	}
 
 	public get factor(): number {
@@ -92,13 +133,19 @@ class GameStateRun implements IState {
 	}
 
 	public set factor(value: number) {
-		this.owner.basketball.x = (1 - value) * (1 - value) * this.owner.lineList[0].y + 2 * value * (1 - value) * this.owner.lineList[1].x + value * value * this.owner.lineList[2].x;
-		this.owner.basketball.y = (1 - value) * (1 - value) * this.owner.lineList[1].y + 2 * value * (1 - value) * this.owner.lineList[1].y + value * value * this.owner.lineList[2].y;
+		this.owner.basketball.x = (1 - value) * (1 - value) * this.owner.lineList[0].x + 2 * value * (1 - value) * this.owner.lineList[1].x + value * value * this.owner.lineList[2].x;
+		this.owner.basketball.y = (1 - value) * (1 - value) * this.owner.lineList[0].y + 2 * value * (1 - value) * this.owner.lineList[1].y + value * value * this.owner.lineList[2].y;
 	}
 
 	private moveOver(): void {
 		this.owner.basketball.x = 375;
 		this.owner.basketball.y = 937;
+		this.owner.shadow.x = this.owner.basketball.x;
+		this.owner.shadow.alpha = 1;
+		this.owner.shadow.scaleX = this.owner.shadow.scaleY = 1;
+		this.owner.shadow.y = 1030;
+		this.owner.basketball.rotation = 0;
+		this.owner.rotations = GameScene.RS;
 		this.owner.staticMachine.changeState(GameStateReady);
 	}
 }

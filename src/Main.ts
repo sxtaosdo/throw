@@ -24,14 +24,15 @@ class Main extends eui.UILayer {
         egret.registerImplementation("eui.IThemeAdapter", new ThemeAdapter());
 
 
-        this.runGame().catch(e => {
+        this.initGame().catch(e => {
             console.log(e);
-        }).then(value=>{
+        }).then(value => {
             SceneManager.instance.changeScene(GameScene);
+            PhysicsManager.instance.showDebug(true);
         })
     }
 
-    private async runGame() {
+    private async initGame() {
         await this.loadResource()
         // this.createGameScene();
         // const result = await RES.getResAsync("description_json")
@@ -47,6 +48,7 @@ class Main extends eui.UILayer {
         ClientManager.instance.init();
         TimerManager.instance.init();
         UserManager.instance.init();
+        PhysicsManager.instance.init(this);
         SceneManager.instance.init(this);
         console.timeEnd("game init");
     }
@@ -55,7 +57,7 @@ class Main extends eui.UILayer {
         try {
             const loadingView = new LoadingUI();
             this.stage.addChild(loadingView);
-            await RES.loadConfig("resource/default.res.json", "resource/"); 
+            await RES.loadConfig("resource/default.res.json", "resource/");
             await this.loadTheme();
             await RES.loadGroup("preload", 0, loadingView);
             this.stage.removeChild(loadingView);

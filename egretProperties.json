@@ -23,6 +23,10 @@
     },
     {
       "name": "promise"
+    },
+    {
+      "name": "physics",
+      "path": "libs/p2Physics"
     }
   ]
 }
